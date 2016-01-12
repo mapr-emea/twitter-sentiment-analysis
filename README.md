@@ -23,9 +23,9 @@ Launch:
     # Manually import the pre-cooked Kibana visualizations and dashboards from /kibana_dashboard/
 
     # Download and Install Kibana
-    curl -O https://download.elastic.co/kibana/kibana/kibana-4.0.0-linux-x64.tar.gz
-    tar xvzf kibana-4.0.0-linux-x64.tar.gz
-    cd kibana-4.0.0-linux-x64
+    curl -O https://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.tar.gz
+    tar xvzf kibana-4.1.1-linux-x64.tar.gz
+    cd kibana-4.1.1-linux-x64
     # Start Kibana
     bin/kibana
 
