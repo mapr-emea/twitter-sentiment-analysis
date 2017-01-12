@@ -1,16 +1,16 @@
-//libraryDependencies += "com.mapr.fs" % "mapr-hbase" % "5.0.0-mapr"
+val hbaseVersion = "1.1.1-mapr-1602-m7-5.2.0"
+libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
 
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.12-mapr-1506-m7-5.0.0"
+libraryDependencies += "org.apache.hbase" % "hbase-client" % hbaseVersion
 
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.12-mapr-1506-m7-5.0.0"
+libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion
 
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.12-mapr-1506-m7-5.0.0"
+val sparkVersion = "2.0.1"
+libraryDependencies += "org.apache.spark" %% "spark-core" %  sparkVersion % "provided"
 
-libraryDependencies += "org.apache.spark" %% "spark-core" % "1.1.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion  % "provided"
 
-libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.1.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming-twitter" % "1.2.0"
+libraryDependencies += "org.apache.bahir" %% "spark-streaming-twitter" % sparkVersion
 
 libraryDependencies += "org.twitter4j" % "twitter4j-stream" % "3.0.3"
 
