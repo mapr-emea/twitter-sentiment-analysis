@@ -2,22 +2,19 @@ package com.github.vspiewak.util
 
 import org.scalatest._
 
-class StringUtilsSpec extends FunSpec with ShouldMatchers {
+class StringUtilsSpec  extends FlatSpec with Matchers with  OptionValues with Inside with Inspectors {
 
-  describe("A String utility class") {
-
-    it("should remove hashtags") {
+  "A String utility class" should "should remove hashtags" in {
 
         StringUtils.onlyWords("ok #word") should be ("ok")
 
     }
 
-    it("should remove url") {
+    it should "should remove url" in {
 
       StringUtils.onlyWords("ok http://google.com") should be ("ok")
 
     }
 
-  }
 
 }
