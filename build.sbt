@@ -13,10 +13,15 @@ dependencyOverrides ++= Set(
   "org.scala-lang" % "scalap" % scalaVersion.value
 )
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
 // Scala deps
 val sparkVersion = "2.0.1"
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion % "provided"
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion % "provided"
 libraryDependencies += "org.apache.bahir" %% "spark-streaming-twitter" % sparkVersion
 
