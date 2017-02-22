@@ -30,7 +30,7 @@ object SentimentAnalysisUtils {
     var mainSentiment = 0
 
     for (sentence <- annotation.get(classOf[CoreAnnotations.SentencesAnnotation])) {
-      val tree = sentence.get(classOf[SentimentCoreAnnotations.AnnotatedTree])
+      val tree = sentence.get(classOf[SentimentCoreAnnotations.SentimentAnnotatedTree])
       val sentiment = RNNCoreAnnotations.getPredictedClass(tree)
       val partText = sentence.toString
 

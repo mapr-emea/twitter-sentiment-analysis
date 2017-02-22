@@ -1,32 +1,49 @@
-//libraryDependencies += "com.mapr.fs" % "mapr-hbase" % "5.0.0-mapr"
 
-libraryDependencies += "org.apache.hbase" % "hbase-common" % "0.98.12-mapr-1506-m7-5.0.0"
-
-libraryDependencies += "org.apache.hbase" % "hbase-client" % "0.98.12-mapr-1506-m7-5.0.0"
-
-libraryDependencies += "org.apache.hbase" % "hbase-server" % "0.98.12-mapr-1506-m7-5.0.0"
-
-libraryDependencies += "org.apache.spark" %% "spark-core" % "1.1.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming" % "1.1.0" % "provided"
-
-libraryDependencies += "org.apache.spark" %% "spark-streaming-twitter" % "1.2.0"
-
-libraryDependencies += "org.twitter4j" % "twitter4j-stream" % "3.0.3"
-
-libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1"
-
-libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1" classifier "models"
-
-libraryDependencies += "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.0.Beta3"
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
-
+crossPaths := false
+scalaVersion := "2.11.8"
 resolvers += "Akka Repository" at "http://repo.akka.io/releases/"
-
 resolvers += "MapR Repo" at "http://repository.mapr.com/maven/"
+resolvers += "clojars" at "https://clojars.org/repo"
+resolvers += "conjars" at "http://conjars.org/repo"
+
+dependencyOverrides ++= Set(
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+  "org.scala-lang" % "scala-library" % scalaVersion.value,
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.scala-lang" % "scalap" % scalaVersion.value
+)
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
+// Scala deps
+val sparkVersion = "2.0.1"
+libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion % "provided"
+libraryDependencies += "org.apache.bahir" %% "spark-streaming-twitter" % sparkVersion
+
+libraryDependencies += "org.elasticsearch" %% "elasticsearch-spark" % "5.0.0-alpha4"
+
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
+// Java deps
+val hbaseVersion = "1.1.1-mapr-1602"
+libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
+libraryDependencies += "org.apache.hbase" % "hbase-client" % hbaseVersion
+libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion
+
+
+libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.16"
+libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.6.2"
+
+libraryDependencies += "org.twitter4j" % "twitter4j-stream" % "4.0.6"
+
+libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0"
+libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models"
+
+

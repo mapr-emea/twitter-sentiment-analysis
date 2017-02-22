@@ -1,9 +1,9 @@
 package com.github.vspiewak.util
 
 import com.github.vspiewak.util.SentimentAnalysisUtils._
-import org.scalatest.{FunSpec, ShouldMatchers}
+import org.scalatest._
 
-class SentimentAnalysisUtilsSpec extends FunSpec with ShouldMatchers {
+class SentimentAnalysisUtilsSpec extends FlatSpec with Matchers with OptionValues with Inside with Inspectors {
 
   /*
         checkSentiment("Radek is a really good football player");
@@ -19,55 +19,51 @@ class SentimentAnalysisUtilsSpec extends FunSpec with ShouldMatchers {
         checkSentiment("Mark is a really bad football player");
    */
 
-  describe("A sentiment analyzis utility class") {
+  "A sentiment analyzis utility class" should "should detect not understood sentiment" in {
 
-    it("should detect not understoood sentiment") {
+    detectSentiment("") should equal(NOT_UNDERSTOOD)
 
-      detectSentiment("") should equal (NOT_UNDERSTOOD)
+  }
 
-    }
+  it should "should detect a negative sentiment" in {
 
-    it("should detect a negative sentiment") {
+    detectSentiment("I am feeling very sad and frustrated.") should equal(NEGATIVE)
 
-      detectSentiment("I am feeling very sad and frustrated.") should equal (NEGATIVE)
+  }
 
-    }
+  it should "should detect a neutral sentiment" in {
 
-    it("should detect a neutral sentiment") {
+    detectSentiment("I'm watching a movie") should equal(NEUTRAL)
 
-      detectSentiment("I'm watching a movie") should equal (NEUTRAL)
+  }
 
-    }
+  it should "should detect a positive sentiment" in {
 
-    it("should detect a positive sentiment") {
+    detectSentiment("It was a nice experience.") should equal(POSITIVE)
 
-      detectSentiment("It was a nice experience.") should equal (POSITIVE)
+  }
 
-    }
+  it should "should detect a very positive sentiment" in {
 
-    it("should detect a very positive sentiment") {
+    detectSentiment("It was a very nice experience.") should equal(VERY_POSITIVE)
 
-      detectSentiment("It was a very nice experience.") should equal (VERY_POSITIVE)
+  }
 
-    }
+  /*    it("should detect a positive sentiment on 2 sentences") {
 
-/*    it("should detect a positive sentiment on 2 sentences") {
+        detect("We did it guys! The boys won at the 2015 Brit Awards for best video") should equal (POSITIVE)
 
-      detect("We did it guys! The boys won at the 2015 Brit Awards for best video") should equal (POSITIVE)
+      }
+  */
 
-    }
-*/
+  it should "should detect a negative sentiment on a full review" in {
 
-    it("should detect a negative sentiment on a full review") {
-
-      detectSentiment(
-        """
-          |This movie doesn't care about cleverness, wit or any other kind of intelligent humor.
-          |Those who find ugly meanings in beautiful things are corrupt without being charming.
-          |There are slow and repetitive parts, but it has just enough spice to keep it interesting.
-        """.stripMargin) should equal (NEGATIVE)
-
-    }
+    detectSentiment(
+      """
+        |This movie doesn't care about cleverness, wit or any other kind of intelligent humor.
+        |Those who find ugly meanings in beautiful things are corrupt without being charming.
+        |There are slow and repetitive parts, but it has just enough spice to keep it interesting.
+      """.stripMargin) should equal(NEGATIVE)
 
   }
 

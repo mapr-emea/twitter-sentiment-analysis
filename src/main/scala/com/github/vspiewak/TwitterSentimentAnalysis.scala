@@ -3,7 +3,6 @@ package com.github.vspiewak
 import java.text.SimpleDateFormat
 
 import com.cybozu.labs.langdetect.DetectorFactory
-import com.github.vspiewak.util.LogUtils
 import com.github.vspiewak.util.SentimentAnalysisUtils._
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Put
@@ -11,15 +10,15 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapred.TableOutputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.mapred.JobConf
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.twitter._
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import com.typesafe.scalalogging._
+import org.apache.spark.sql.SparkSession
 import org.elasticsearch.spark._
 
 import scala.util.Try
 
-object TwitterSentimentAnalysis {
+object TwitterSentimentAnalysis extends LazyLogging {
 
   private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
 
@@ -30,8 +29,6 @@ object TwitterSentimentAnalysis {
          "<access token> <access token secret> [<filters>]")
        System.exit(1)
      }
-
-     LogUtils.setStreamingLogLevels()
 
      DetectorFactory.loadProfile("src/main/resources/profiles")
 
@@ -45,11 +42,10 @@ object TwitterSentimentAnalysis {
      System.setProperty("twitter4j.oauth.accessToken", accessToken)
      System.setProperty("twitter4j.oauth.accessTokenSecret", accessTokenSecret)
 
-     val sparkConf = new SparkConf().setAppName("TwitterSentimentAnalysis")
+     val spark = SparkSession.builder().appName("TwitterSentimentAnalysis").getOrCreate()
 
-     val ssc = new StreamingContext(sparkConf, Seconds(1))
-
-     val tweets = TwitterUtils.createStream(ssc, None, filters)
+    val streamingContext = new StreamingContext(spark.sparkContext, Seconds(1))
+     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
 
      tweets.print()
 
@@ -62,6 +58,7 @@ object TwitterSentimentAnalysis {
     jobConfig.set("mapreduce.output.fileoutputformat.outputdir", "/user/user01/out")
     jobConfig.setOutputFormat(classOf[TableOutputFormat])
     jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
+
 
     tweets.foreachRDD{(rdd, time) =>
        rdd.map(t => {
@@ -96,8 +93,8 @@ object TwitterSentimentAnalysis {
        }).saveAsHadoopDataset(jobConfig)
      }
 
-     ssc.start()
-     ssc.awaitTermination()
+     streamingContext.start()
+     streamingContext.awaitTermination()
 
    }
 
