@@ -25,7 +25,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provi
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion % "provided"
 libraryDependencies += "org.apache.bahir" %% "spark-streaming-twitter" % sparkVersion
 
-libraryDependencies += "org.elasticsearch" %% "elasticsearch-spark" % "5.0.0-alpha4"
+libraryDependencies += "org.elasticsearch" %% "elasticsearch-spark-20" % "5.2.1"
 
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 
