@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "All-tweets",
+    "_type": "search",
+    "_source": {
+      "title": "All tweets",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "_source"
+      ],
+      "sort": [
+        "_score",
+        "desc"
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"twitter\",\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}}},\"filter\":[],\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}}}"
+      }
+    }
+  }
+]
