@@ -19,7 +19,7 @@ assemblyMergeStrategy in assembly := {
 }
 
 // Scala deps
-val sparkVersion = "2.0.1"
+val sparkVersion = "2.1.0"
 libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % sparkVersion % "provided"
@@ -32,7 +32,7 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 // Java deps
-val hbaseVersion = "1.1.1-mapr-1602"
+val hbaseVersion = "1.1.8-mapr-1703"
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion
 libraryDependencies += "org.apache.hbase" % "hbase-client" % hbaseVersion
 libraryDependencies += "org.apache.hbase" % "hbase-server" % hbaseVersion
