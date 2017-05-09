@@ -15,6 +15,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import com.typesafe.scalalogging._
 import org.apache.spark.sql.SparkSession
 import org.elasticsearch.spark._
+import com.mapr.db.spark._
 
 import scala.util.Try
 
@@ -64,31 +65,37 @@ object TwitterSentimentAnalysis extends LazyLogging {
     if (storageType.toLowerCase() == "maprdbonly" || storageType.toLowerCase() == "maprdbandelastic") {
       //set JobConfiguration variables for writing to HBase
       val tableName = maprdbTableName
-      val cfNameBytes = Bytes.toBytes(maprdbColumnFamilyName)
 
-      val conf = HBaseConfiguration.create()
-      val jobConfig: JobConf = new JobConf(conf, this.getClass)
-      jobConfig.set("mapreduce.output.fileoutputformat.outputdir", tempOutputFolder)
-      jobConfig.setOutputFormat(classOf[TableOutputFormat])
-      jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
+      // maprdb-json trial
+      tweets.foreachRDD{(rdd, time) =>
+         rdd.saveToMapRDB(tableName, idFieldPath = "id")
+      }
+
+      //val cfNameBytes = Bytes.toBytes(maprdbColumnFamilyName)
+
+      //val conf = HBaseConfiguration.create()
+      //val jobConfig: JobConf = new JobConf(conf, this.getClass)
+      //jobConfig.set("mapreduce.output.fileoutputformat.outputdir", tempOutputFolder)
+      //jobConfig.setOutputFormat(classOf[TableOutputFormat])
+      //jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
 
       // Write to MapR-DB
-      tweets.foreachRDD{(rdd, time) =>
-         rdd.map(t => {dateFormatter.format(t.getCreatedAt)
-           val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
-           val p = new Put(Bytes.toBytes(key))
+      //tweets.foreachRDD{(rdd, time) =>
+      //   rdd.map(t => {dateFormatter.format(t.getCreatedAt)
+      //     val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
+      //     val p = new Put(Bytes.toBytes(key))
 
-           p.add(cfNameBytes, Bytes.toBytes("user"), Bytes.toBytes(t.getUser.getScreenName))
-           p.add(cfNameBytes, Bytes.toBytes("created_at"), Bytes.toBytes(dateFormatter.format(t.getCreatedAt)))
-           p.add(cfNameBytes, Bytes.toBytes("location"), Bytes.toBytes(Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString))
-           p.add(cfNameBytes, Bytes.toBytes("text"), Bytes.toBytes(t.getText))
-           p.add(cfNameBytes, Bytes.toBytes("hashtags"), Bytes.toBytes(t.getHashtagEntities.map(_.getText).toString))
-           p.add(cfNameBytes, Bytes.toBytes("retweet"), Bytes.toBytes(t.getRetweetCount))
-           p.add(cfNameBytes, Bytes.toBytes("language"), Bytes.toBytes(detectLanguage(t.getText)))
-           p.add(cfNameBytes, Bytes.toBytes("sentiment"), Bytes.toBytes(detectSentiment(t.getText).toString))
-           (new ImmutableBytesWritable, p)
-         }).saveAsHadoopDataset(jobConfig)
-       }
+      //     p.add(cfNameBytes, Bytes.toBytes("user"), Bytes.toBytes(t.getUser.getScreenName))
+      //     p.add(cfNameBytes, Bytes.toBytes("created_at"), Bytes.toBytes(dateFormatter.format(t.getCreatedAt)))
+      //     p.add(cfNameBytes, Bytes.toBytes("location"), Bytes.toBytes(Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString))
+      //     p.add(cfNameBytes, Bytes.toBytes("text"), Bytes.toBytes(t.getText))
+      //     p.add(cfNameBytes, Bytes.toBytes("hashtags"), Bytes.toBytes(t.getHashtagEntities.map(_.getText).toString))
+      //     p.add(cfNameBytes, Bytes.toBytes("retweet"), Bytes.toBytes(t.getRetweetCount))
+      //     p.add(cfNameBytes, Bytes.toBytes("language"), Bytes.toBytes(detectLanguage(t.getText)))
+      //     p.add(cfNameBytes, Bytes.toBytes("sentiment"), Bytes.toBytes(detectSentiment(t.getText).toString))
+      //     (new ImmutableBytesWritable, p)
+      //   }).saveAsHadoopDataset(jobConfig)
+      // }
     }
 
     // Write tweets to Elasticsearch
