@@ -51,51 +51,46 @@ object TwitterSentimentAnalysis extends LazyLogging {
 
      tweets.print()
 
-    //set JobConfiguration variables for writing to HBase
-    //val tableName = "twitter_sentiment"
-    //val cfNameBytes = Bytes.toBytes("TwitterSentiment")
+      set JobConfiguration variables for writing to HBase
+      val tableName = "twitter_sentiment"
+      val cfNameBytes = Bytes.toBytes("TwitterSentiment")
 
-    //val conf = HBaseConfiguration.create()
-    //val jobConfig: JobConf = new JobConf(conf, this.getClass)
-    //jobConfig.set("mapreduce.output.fileoutputformat.outputdir", "/user/user01/out")
-    //jobConfig.setOutputFormat(classOf[TableOutputFormat])
-    //jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
+      val conf = HBaseConfiguration.create()
+      val jobConfig: JobConf = new JobConf(conf, this.getClass)
+      jobConfig.set("mapreduce.output.fileoutputformat.outputdir", "/user/user01/out")
+      jobConfig.setOutputFormat(classOf[TableOutputFormat])
+      jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
 
-    // write tweets to MapR-DB
-    if (storageType.toLowerCase() == "maprdbonly" || storageType.toLowerCase() == "maprdbandelastic") {
-      //set JobConfiguration variables for writing to HBase
-      val tableName = maprdbTableName
+      // write tweets to MapR-DB Binary
+      if (storageType.toLowerCase() == "maprdbonly" || storageType.toLowerCase() == "maprdbandelastic") {
+        //set JobConfiguration variables for writing to HBase
+        val tableName = maprdbTableName
 
-      // maprdb-json trial
-      tweets.foreachRDD{(rdd, time) =>
-         rdd.saveToMapRDB(tableName, idFieldPath = "id")
-      }
+        val cfNameBytes = Bytes.toBytes(maprdbColumnFamilyName)
 
-      //val cfNameBytes = Bytes.toBytes(maprdbColumnFamilyName)
+        val conf = HBaseConfiguration.create()
+        val jobConfig: JobConf = new JobConf(conf, this.getClass)
+        jobConfig.set("mapreduce.output.fileoutputformat.outputdir", tempOutputFolder)
+        jobConfig.setOutputFormat(classOf[TableOutputFormat])
+        jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
 
-      //val conf = HBaseConfiguration.create()
-      //val jobConfig: JobConf = new JobConf(conf, this.getClass)
-      //jobConfig.set("mapreduce.output.fileoutputformat.outputdir", tempOutputFolder)
-      //jobConfig.setOutputFormat(classOf[TableOutputFormat])
-      //jobConfig.set(TableOutputFormat.OUTPUT_TABLE, tableName)
+        // Write to MapR-DB
+        tweets.foreachRDD{(rdd, time) =>
+          rdd.map(t => {dateFormatter.format(t.getCreatedAt)
+            val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
+            val p = new Put(Bytes.toBytes(key))
 
-      // Write to MapR-DB
-      //tweets.foreachRDD{(rdd, time) =>
-      //   rdd.map(t => {dateFormatter.format(t.getCreatedAt)
-      //     val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
-      //     val p = new Put(Bytes.toBytes(key))
-
-      //     p.add(cfNameBytes, Bytes.toBytes("user"), Bytes.toBytes(t.getUser.getScreenName))
-      //     p.add(cfNameBytes, Bytes.toBytes("created_at"), Bytes.toBytes(dateFormatter.format(t.getCreatedAt)))
-      //     p.add(cfNameBytes, Bytes.toBytes("location"), Bytes.toBytes(Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString))
-      //     p.add(cfNameBytes, Bytes.toBytes("text"), Bytes.toBytes(t.getText))
-      //     p.add(cfNameBytes, Bytes.toBytes("hashtags"), Bytes.toBytes(t.getHashtagEntities.map(_.getText).toString))
-      //     p.add(cfNameBytes, Bytes.toBytes("retweet"), Bytes.toBytes(t.getRetweetCount))
-      //     p.add(cfNameBytes, Bytes.toBytes("language"), Bytes.toBytes(detectLanguage(t.getText)))
-      //     p.add(cfNameBytes, Bytes.toBytes("sentiment"), Bytes.toBytes(detectSentiment(t.getText).toString))
-      //     (new ImmutableBytesWritable, p)
-      //   }).saveAsHadoopDataset(jobConfig)
-      // }
+            p.add(cfNameBytes, Bytes.toBytes("user"), Bytes.toBytes(t.getUser.getScreenName))
+            p.add(cfNameBytes, Bytes.toBytes("created_at"), Bytes.toBytes(dateFormatter.format(t.getCreatedAt)))
+            p.add(cfNameBytes, Bytes.toBytes("location"), Bytes.toBytes(Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString))
+            p.add(cfNameBytes, Bytes.toBytes("text"), Bytes.toBytes(t.getText))
+            p.add(cfNameBytes, Bytes.toBytes("hashtags"), Bytes.toBytes(t.getHashtagEntities.map(_.getText).toString))
+            p.add(cfNameBytes, Bytes.toBytes("retweet"), Bytes.toBytes(t.getRetweetCount))
+            p.add(cfNameBytes, Bytes.toBytes("language"), Bytes.toBytes(detectLanguage(t.getText)))
+            p.add(cfNameBytes, Bytes.toBytes("sentiment"), Bytes.toBytes(detectSentiment(t.getText).toString))
+            (new ImmutableBytesWritable, p)
+          }).saveAsHadoopDataset(jobConfig)
+       }
     }
 
     // Write tweets to Elasticsearch
@@ -115,6 +110,28 @@ object TwitterSentimentAnalysis extends LazyLogging {
          }).saveToEs("twitter/tweet")
       }
     }
+
+    // Write tweets to MapR-DB JSON 
+    if (storageType.toLowerCase() == "maprdbjsononly") {
+      val tableName = maprdbTableName
+
+      tweets.foreachRDD{(rdd, time) =>
+        rdd.map(t => {dateFormatter.format(t.getCreatedAt)
+           val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
+
+          MapRDBSpark.newDocument("{}")
+            .set("_id", key)
+            .set("user", t.getUser.getScreenName)
+            .set("created_at", dateFormatter.format(t.getCreatedAt))
+            .set("location", Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString)
+            .set("text", t.getText)
+            .set("hashtags", t.getHashtagEntities.map(_.getText).toString)
+            .set("retweet", t.getRetweetCount)
+            .set("language", detectLanguage(t.getText))
+            .set("sentiment", detectSentiment(t.getText).toString)
+          }).saveToMapRDB(tableName)
+      }
+
      streamingContext.start()
      streamingContext.awaitTermination()
    }
