@@ -31,6 +31,10 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
+// MapR-DB deps
+val maprVersion = "5.2.1-mapr"
+libraryDependencies += "com.mapr.db" % "maprdb-spark" % maprVersion
+
 // Java deps
 val hbaseVersion = "1.1.8-mapr-1703"
 libraryDependencies += "org.apache.hbase" % "hbase-common" % hbaseVersion

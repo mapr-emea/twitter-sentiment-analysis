@@ -15,6 +15,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import com.typesafe.scalalogging._
 import org.apache.spark.sql.SparkSession
 import org.elasticsearch.spark._
+import com.mapr.db.spark._
 
 import scala.util.Try
 
@@ -91,6 +92,28 @@ object TwitterSentimentAnalysis extends LazyLogging {
        }
     }
 
+
+    if (storageType.toLowerCase() == "maprdbjsononly" || storageType.toLowerCase() == "maprdbjsonandelastic")  {
+      val tableName = maprdbTableName
+
+      tweets.foreachRDD{(rdd, time) =>
+        rdd.map(t => {dateFormatter.format(t.getCreatedAt)
+           val key = t.getUser.getScreenName + "-" + dateFormatter.format(t.getCreatedAt)
+
+          MapRDBSpark.newDocument("{}")
+            .set("_id", key)
+            .set("user", t.getUser.getScreenName)
+            .set("created_at", dateFormatter.format(t.getCreatedAt))
+            .set("location", Option(t.getGeoLocation).map(geo => { s"${geo.getLatitude},${geo.getLongitude}" }).toString)
+            .set("text", t.getText)
+            .set("hashtags", t.getHashtagEntities.map(_.getText).toString)
+            .set("retweet", t.getRetweetCount)
+            .set("language", detectLanguage(t.getText))
+            .set("sentiment", detectSentiment(t.getText).toString)
+          }).saveToMapRDB(tableName)
+      }
+    }
+
     // Write tweets to Elasticsearch
     if (storageType.toLowerCase() == "elasticonly" || storageType.toLowerCase() == "maprdbandelastic") {
        tweets.foreachRDD{(rdd, time) =>
@@ -121,5 +144,4 @@ object TwitterSentimentAnalysis extends LazyLogging {
     }.getOrElse("unknown")
 
   }
-
  }
