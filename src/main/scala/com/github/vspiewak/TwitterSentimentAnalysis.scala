@@ -93,7 +93,7 @@ object TwitterSentimentAnalysis extends LazyLogging {
     }
 
 
-    if (storageType.toLowerCase() == "maprdbjsononly") {
+    if (storageType.toLowerCase() == "maprdbjsononly" || storageType.toLowerCase() == "maprdbjsonandelastic")  {
       val tableName = maprdbTableName
 
       tweets.foreachRDD{(rdd, time) =>
