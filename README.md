@@ -27,7 +27,7 @@ Launch:
     <consumer_secret> \
     <access_token> \
     <access_token_secret> \
-    <maprdbandelastic|maprdbonly|elasticonly> \
+    <maprdbandelastic|maprdbjsonandelastic|maprdbonly|maprdbjsononly|elasticonly> \
     </path/to/maprdb-binary-table> \
     <ColumnFamily> \
     /user/mapr/out \
