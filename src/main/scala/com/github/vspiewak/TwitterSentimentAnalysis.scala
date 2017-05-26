@@ -115,7 +115,7 @@ object TwitterSentimentAnalysis extends LazyLogging {
     }
 
     // Write tweets to Elasticsearch
-    if (storageType.toLowerCase() == "elasticonly" || storageType.toLowerCase() == "maprdbandelastic") {
+    if (storageType.toLowerCase() == "elasticonly" || storageType.toLowerCase() == "maprdbandelastic" || storageType.toLowerCase() == "maprdbjsonandelastic") {
        tweets.foreachRDD{(rdd, time) =>
          rdd.map(t => {
            Map(
